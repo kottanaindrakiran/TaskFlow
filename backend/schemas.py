@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
-from .models import Role, TaskStatus, TaskPriority
+from models import Role, TaskStatus, TaskPriority
 
 class UserBase(BaseModel):
     name: str
