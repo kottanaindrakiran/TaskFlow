@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from database import engine, Base
 from routers import auth, users, projects, tasks, dashboard
 
@@ -10,7 +11,13 @@ app = FastAPI(title="TaskFlow API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to frontend URL
+    allow_origins=[
+        "https://task-flow-sigma-six.vercel.app",
+        "https://frontend-gamma-six-80.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        os.getenv("FRONTEND_URL", ""),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
