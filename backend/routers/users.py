@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from .. import schemas, models, dependencies
+import schemas, models, dependencies
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

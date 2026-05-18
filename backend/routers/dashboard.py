@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import schemas, models, dependencies
+import schemas, models, dependencies
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 

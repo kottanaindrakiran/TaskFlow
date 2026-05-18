@@ -1,8 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from .. import schemas, models, dependencies
-from .projects import log_activity
+import schemas, models, dependencies
+from routers.projects import log_activity
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
