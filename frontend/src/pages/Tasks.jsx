@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle, X } from 'lucide-react';
 import api from '../api/api';
 import toast from 'react-hot-toast';
 
@@ -58,6 +58,8 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [projectsMap, setProjectsMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', description: '', project_id: '', priority: 'medium', status: 'todo' });
 
   const fetchTasks = async () => {
     try {
@@ -79,6 +81,19 @@ export default function Tasks() {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/tasks/', newTask);
+      toast.success('Task created successfully');
+      setShowTaskModal(false);
+      setNewTask({ title: '', description: '', project_id: '', priority: 'medium', status: 'todo' });
+      fetchTasks();
+    } catch (err) {
+      toast.error('Failed to create task');
+    }
+  };
 
   const handleDragStart = (e, taskId) => {
     e.dataTransfer.setData('taskId', taskId);
@@ -115,7 +130,7 @@ export default function Tasks() {
     <div className="p-8 h-full flex flex-col max-w-[1400px] mx-auto w-full">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Tasks</h1>
-        <button className="flex items-center gap-2 bg-transparent border border-border text-white hover:bg-card px-4 py-2 rounded-lg font-medium transition-colors">
+        <button onClick={() => setShowTaskModal(true)} className="flex items-center gap-2 bg-transparent border border-border text-white hover:bg-card px-4 py-2 rounded-lg font-medium transition-colors">
           <Plus size={18} /> New task
         </button>
       </div>
@@ -138,7 +153,7 @@ export default function Tasks() {
           </div>
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {todoTasks.map(task => <TaskCard key={task.id} task={task} projectsMap={projectsMap} onDragStart={handleDragStart} />)}
-            <button className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
+            <button onClick={() => setShowTaskModal(true)} className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
               <Plus size={18} /> Add task
             </button>
           </div>
@@ -161,7 +176,7 @@ export default function Tasks() {
           </div>
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {inProgressTasks.map(task => <TaskCard key={task.id} task={task} projectsMap={projectsMap} onDragStart={handleDragStart} />)}
-            <button className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
+            <button onClick={() => setShowTaskModal(true)} className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
               <Plus size={18} /> Add task
             </button>
           </div>
@@ -184,12 +199,63 @@ export default function Tasks() {
           </div>
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {doneTasks.map(task => <TaskCard key={task.id} task={task} projectsMap={projectsMap} onDragStart={handleDragStart} />)}
-            <button className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
+            <button onClick={() => setShowTaskModal(true)} className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted font-medium hover:text-white hover:border-text-secondary transition-colors flex items-center justify-center gap-2">
               <Plus size={18} /> Add task
             </button>
           </div>
         </div>
       </div>
+      {/* Create Task Modal */}
+      {showTaskModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border p-6 rounded-xl w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Create New Task</h2>
+              <button onClick={() => setShowTaskModal(false)} className="text-text-muted hover:text-white"><X size={24}/></button>
+            </div>
+            <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Task Title</label>
+                <input required type="text" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary" placeholder="Enter task title" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Project</label>
+                <select required value={newTask.project_id} onChange={e => setNewTask({...newTask, project_id: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                  <option value="" disabled>Select a project</option>
+                  {Object.values(projectsMap).map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1">Priority</label>
+                  <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1">Status</label>
+                  <select value={newTask.status} onChange={e => setNewTask({...newTask, status: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    <option value="todo">Todo</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="done">Done</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary min-h-[80px]" placeholder="Optional description"></textarea>
+              </div>
+              <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 rounded-lg transition-colors mt-2">
+                Create Task
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

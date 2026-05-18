@@ -11,6 +11,9 @@ export default function Projects() {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectActivity, setProjectActivity] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
   const { user } = useAuth();
   
   const isAdmin = user?.role === 'admin';
@@ -32,6 +35,20 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
+  const handleCreateProject = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/projects/', { name: newProjectName, description: newProjectDesc });
+      toast.success('Project created successfully');
+      setShowModal(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      fetchProjects();
+    } catch (err) {
+      toast.error('Failed to create project');
+    }
+  };
+
   const openProjectDrawer = async (project) => {
     setSelectedProject(project);
     try {
@@ -49,7 +66,7 @@ export default function Projects() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-white">Projects</h1>
         {isAdmin && (
-          <button className="flex items-center gap-2 bg-transparent border border-border text-white hover:bg-card px-4 py-2 rounded-lg font-medium transition-colors">
+          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-transparent border border-border text-white hover:bg-card px-4 py-2 rounded-lg font-medium transition-colors">
             <Plus size={18} /> New project
           </button>
         )}
@@ -103,7 +120,7 @@ export default function Projects() {
 
         {/* Create New Project Placeholder */}
         {isAdmin && (
-          <div className="border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-8 text-text-muted hover:text-white hover:border-text-muted hover:bg-card/30 transition-all cursor-pointer min-h-[250px]">
+          <div onClick={() => setShowModal(true)} className="border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-8 text-text-muted hover:text-white hover:border-text-muted hover:bg-card/30 transition-all cursor-pointer min-h-[250px]">
             <div className="w-12 h-12 rounded-full border border-current flex items-center justify-center mb-4">
               <Plus size={24} />
             </div>
@@ -137,6 +154,30 @@ export default function Projects() {
             </div>
           </div>
         </>
+      )}
+      {/* Create Project Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border p-6 rounded-xl w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Create New Project</h2>
+              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-white"><X size={24}/></button>
+            </div>
+            <form onSubmit={handleCreateProject} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Project Name</label>
+                <input required type="text" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary" placeholder="Enter project name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea value={newProjectDesc} onChange={e => setNewProjectDesc(e.target.value)} className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary min-h-[100px]" placeholder="Enter project description"></textarea>
+              </div>
+              <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 rounded-lg transition-colors mt-2">
+                Create Project
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
