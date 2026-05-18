@@ -11,14 +11,8 @@ app = FastAPI(title="TaskFlow API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://task-flow-sigma-six.vercel.app",
-        "https://frontend-gamma-six-80.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        os.getenv("FRONTEND_URL", ""),
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
