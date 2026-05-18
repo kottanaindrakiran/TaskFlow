@@ -16,7 +16,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
     is_first_user = db.query(models.User).count() == 0
     role = models.Role.admin if is_first_user else models.Role.member
     
-    hashed_password = auth.get_password_hash(user.password)
+    hashed_password = auth.get_password_hash(user.password[:72])
     new_user = models.User(
         name=user.name, 
         email=user.email, 
