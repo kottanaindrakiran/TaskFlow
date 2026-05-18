@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+let baseURL = import.meta.env.VITE_API_URL || 'https://taskflow-production-22fe.up.railway.app/api';
+if (baseURL && !baseURL.endsWith('/api')) {
+  baseURL += '/api';
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: baseURL,
 });
 
 api.interceptors.request.use((config) => {
